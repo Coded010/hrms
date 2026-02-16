@@ -1,5 +1,44 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
-body {
-  font-family: "Poppins", Arial, Helvetica, sans-serif;
+@layer base {
+    h1 {
+    @apply text-4xl font-bold;
+    }
+    h2 {
+        @apply text-2xl font-bold;
+    }
+    h3 {
+        @apply text-xl font-bold;
+    }
+    h4 {
+        @apply text-lg font-bold;
+    }
+    h5 {
+        @apply text-sm font-bold;
+    }
+    h6 {
+        @apply text-xs font-bold;
+    }
+
+    body {
+        font-family: "Poppins", Arial, Helvetica, sans-serif;
+        background-color: #FBFEFC;
+        color: #202020;
+    }
+}
+
+@layer utilities {
+    .btn-primary {
+        @apply btn bg-[#5BB98B] border-[#4daa7d] text-white hover:bg-[#4daa7d] shadow-[0_2px_3px_0_#5BB98B] active:shadow-none
+    }
+    /* TODO: Create custom button styles */
+}
+
+.text-white {
+    @apply text-[#fbfefc]
+}
+
+.text-black {
+    @apply text-[#202020]
 }
