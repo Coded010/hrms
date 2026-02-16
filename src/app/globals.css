@@ -29,10 +29,15 @@
 }
 
 @layer utilities {
-    .btn-primary {
-        @apply btn bg-[#5BB98B] border-[#4daa7d] text-white hover:bg-[#4daa7d] shadow-[0_2px_3px_0_#5BB98B] active:shadow-none
-    }
     /* TODO: Create custom button styles */
+    .btn-primary {
+        @apply bg-[#5BB98B] border-[#4daa7d] text-white hover:bg-[#4daa7d] shadow-[0_2px_3px_0_#5BB98B] active:shadow-none
+    }
+
+    /* TODO: Create custom text styles */
+    .text-primary {
+        @apply text-[#5BB98B]
+    }
 }
 
 .text-white {
