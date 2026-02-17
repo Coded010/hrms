@@ -1,11 +1,26 @@
+'use client';
+
 import Link from "next/link";
+import { useState } from "react";
+import { signIn } from "@/app/actions/auth/signin";
 
 export default function SigninForm() {
+    const [formData, setFormData] = useState({ 
+        email: '', 
+        password: '' 
+    });
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        await signIn(formData);
+    }
+
     return (
-        <form className="flex flex-col justify-center items-center gap-13 ">
+        <form className="flex flex-col justify-center items-center gap-13 " onSubmit={handleSubmit}>
             <div className="input input-lg w-full">
                 <input type="email"
-                placeholder="Enter your email" 
+                placeholder="Enter your email"
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
             </div>
 
@@ -16,7 +31,8 @@ export default function SigninForm() {
                     Forgot password?
                 </Link>
                 <input type="password"
-                placeholder="Enter your password" 
+                placeholder="Enter your password"
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
             </div>
 
