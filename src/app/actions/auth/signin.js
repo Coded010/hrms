@@ -1,22 +1,22 @@
 'use server'
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export async function signIn({ email, password }) {
     if (!email || !password) {
-        throw new Error('Email and password are required')
+        throw new Error('Email and password are required');
     }
 
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createClient();
 
     const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-    })
+    });
 
     if (error) {
-        throw new Error(error.message)
+        throw new Error(error.message);
     }
 
     redirect('/');
