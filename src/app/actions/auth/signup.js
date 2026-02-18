@@ -1,25 +1,25 @@
 'use server'
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export async function signUp({ email, password, firstName, lastName }) {
     if (!email || !password || !firstName || !lastName) {
-        throw new Error('All fields are required')
+        throw new Error('All fields are required');
     }
 
 
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createClient();
 
     const { data , error } = await supabase.auth.signUp({
         email,
         password,
     })
 
-    if (error) throw new Error(error.message)
+    if (error) throw new Error(error.message);
 
-    const userId = data.user?.id
-    if (!userId) throw new Error('User not created')
+    const userId = data.user?.id;
+    if (!userId) throw new Error('User not created');
 
     await supabase.from('users').insert({
         id: userId,
@@ -31,7 +31,7 @@ export async function signUp({ email, password, firstName, lastName }) {
     await supabase.from('user_roles').insert({
         user_id: userId,
         role: 'faculty',
-    })
+    });
 
     redirect('/');
 }
