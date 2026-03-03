@@ -1,4 +1,4 @@
-import SigninForm from "@/components/auth/SigninForm";
+import SigninForm from "components/auth/SigninForm";
 import Link from "next/link";
 
 export const metadata = {
@@ -16,7 +16,7 @@ export default async function Signin() {
                 </p>
             </div>
 
-            <div className="w-full">
+            <div className="w-full max-w-sm">
                 <SigninForm />
             </div>
 

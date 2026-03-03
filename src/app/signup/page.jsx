@@ -1,4 +1,4 @@
-import SignupForm from "@/components/auth/SignupForm";
+import SignupForm from "components/auth/SignupForm";
 import Link from "next/link";
 
 export const metadata = {
@@ -15,8 +15,8 @@ export default function Signup() {
                     Enter your credentials to create an account
                 </p>
             </div>
-
-            <div className="w-full">
+        
+            <div className="w-full max-w-sm">
                 <SignupForm />
             </div>
 
