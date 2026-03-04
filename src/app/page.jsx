@@ -1,5 +1,5 @@
-import SignOutForm from "@/components/auth/SignoutForm";
-import { getCurrentUser } from "@/lib/supabase/auth/getCurrentUser";
+import SignOutForm from "components/auth/SignoutForm";
+import { getCurrentUser } from "lib/supabase/auth/getCurrentUser";
 import { redirect } from "next/navigation";
 
 export default async function Home() {

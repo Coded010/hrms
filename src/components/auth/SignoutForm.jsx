@@ -1,6 +1,6 @@
 'use client'
 
-import { signOut } from "@/app/actions/auth/signout";
+import { signOut } from "actions/auth/signout";
 import { redirect } from "next/navigation";
 
 export default function SignOutForm() {
