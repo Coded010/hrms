@@ -19,5 +19,5 @@ export async function signIn({ email, password }) {
         throw new Error(error.message);
     }
 
-    redirect('/');
+    redirect('/dashboard/1/overview');
 }

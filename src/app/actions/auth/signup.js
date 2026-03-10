@@ -33,5 +33,5 @@ export async function signUp({ email, password, firstName, lastName }) {
         role: 'faculty',
     });
 
-    redirect('/');
+    redirect('/dashboard/1/overview');
 }

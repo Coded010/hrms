@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata = {
     title: "Sign up",
-    description: "Sign up to create an account",
+    description: "Enter your credentials to create an account",
 };
 
 export default function Signup() {
@@ -24,7 +24,7 @@ export default function Signup() {
                 <p className="text-center text-gray-500">
                     Already have an account?
                 </p>
-                <Link href="/signin" className="text-primary">
+                <Link href="/" className="text-primary">
                     Sign in
                 </Link>
             </div>

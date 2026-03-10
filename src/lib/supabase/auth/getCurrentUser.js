@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { createClient } from "lib/supabase/server";
 
 export async function getCurrentUser() {
@@ -7,10 +6,6 @@ export async function getCurrentUser() {
     const {
         data: { user },
     } = await supabase.auth.getUser();
-
-    if (!user) {
-        redirect('/signin');
-    }
 
     return user;
 }
