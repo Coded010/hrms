@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from "lib/supabase/server";
-import { redirect } from "next/navigation";
 
 export async function signIn({ email, password }) {
     if (!email || !password) {
@@ -18,6 +17,4 @@ export async function signIn({ email, password }) {
     if (error) {
         throw new Error(error.message);
     }
-
-    redirect('/dashboard/1/overview');
 }

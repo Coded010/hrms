@@ -14,24 +14,38 @@ export async function proxy(request) {
         {
             cookies: {
                 getAll() {
-                return request.cookies.getAll();
+                    return request.cookies.getAll();
                 },
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value }) =>
-                        request.cookies.set(name, value)
+                        request.cookies.set(name, value),
                     );
 
                     response = NextResponse.next({ request });
 
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        response.cookies.set(name, value, options)
+                        response.cookies.set(name, value, options),
                     );
                 },
             },
-        }
+        },
     );
 
-    await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/";
+        return NextResponse.redirect(url);
+    }
+
+    if (user && request.nextUrl.pathname === "/") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard/1/overview";
+        return NextResponse.redirect(url);
+    }
 
     return response;
 }
@@ -39,11 +53,11 @@ export async function proxy(request) {
 export const config = {
     matcher: [
         /*
-        * Match all request paths except for the ones starting with:
-        * - _next/static (static files)
-        * - _next/image (image optimization files)
-        * - favicon.ico (favicon file)
-        */
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         */
+        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     ],
 };
