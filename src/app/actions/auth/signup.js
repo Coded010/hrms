@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from "lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export async function signUp({ email, password, firstName, lastName }) {
     if (!email || !password || !firstName || !lastName) {
@@ -30,5 +31,7 @@ export async function signUp({ email, password, firstName, lastName }) {
     await supabase.from('user_roles').insert({
         user_id: userId,
         role: 'faculty',
-    }); 
+    });
+
+    redirect('/');
 }
