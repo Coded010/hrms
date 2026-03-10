@@ -98,7 +98,14 @@ export default function SigninForm() {
                 className="btn btn-primary btn-lg w-full"
                 disabled={isSubmitting}
             >
-                Sign in
+                {isSubmitting ? (
+                    <>
+                        <span className="loading loading-spinner"></span>
+                        Signing in...
+                    </>
+                ) : (
+                    "Sign in"
+                )}
             </button>
         </form>
     );
