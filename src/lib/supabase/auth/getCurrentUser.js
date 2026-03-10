@@ -6,8 +6,8 @@ export const getCurrentUser = cache(async () => {
     const supabase = await createClient();
 
     const {
-        data: { user },
-    } = await supabase.auth.getUser();
+        data: { session },
+    } = await supabase.auth.getSession();
 
-    return user;
+    return session?.user ?? null;
 });
