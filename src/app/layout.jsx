@@ -8,8 +8,8 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-    title: "HRMS",
-    description: "Human Resource Management System",
+    title: "Sign in",
+    description: "Enter your credentials to access your dashboard",
 };
 
 export default function RootLayout({ children }) {

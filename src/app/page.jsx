@@ -1,11 +1,6 @@
 import SigninForm from "components/auth/SigninForm";
 import Link from "next/link";
 
-export const metadata = {
-    title: "Sign in",
-    description: "Enter your credentials to access your dashboard",
-};
-
 export default async function Signin() {
     return (
         <main className="flex flex-col items-center justify-center h-screen gap-15">
