@@ -2,8 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
 export async function proxy(request) {
-    // 1. THE MAGIC FIX: Bypass Supabase completely for Next.js prefetch requests!
-    // This eliminates the latency issue by stopping parallel background requests.
     const isPrefetch = 
         request.headers.get("next-router-prefetch") === "1" || 
         request.headers.get("purpose") === "prefetch";
@@ -12,7 +10,6 @@ export async function proxy(request) {
         return NextResponse.next();
     }
 
-    // 2. Normal Middleware Logic for actual route visits
     let response = NextResponse.next({
         request: {
             headers: request.headers,
@@ -42,8 +39,6 @@ export async function proxy(request) {
         },
     );
 
-    // 3. SECURE: Back to using getUser(). 
-    // Since we bypassed prefetches, this will no longer cause lag!
     const {
         data: { user },
     } = await supabase.auth.getUser();
