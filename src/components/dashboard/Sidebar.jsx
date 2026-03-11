@@ -67,6 +67,7 @@ export default function Sidebar() {
                                 ? "bg-[#e9f7f1] text-[#5bb98b]"
                                 : "text-[#4a4a4a] hover:bg-[#f4faf7] hover:text-[#5bb98b]",
                         ].join(" ")}
+                        prefetch={false}
                     >
                         <Icon
                             className={[

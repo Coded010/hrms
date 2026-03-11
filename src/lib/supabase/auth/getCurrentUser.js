@@ -1,13 +1,17 @@
 import { createClient } from "lib/supabase/server";
-
 import { cache } from "react";
 
 export const getCurrentUser = cache(async () => {
     const supabase = await createClient();
 
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
+        data: { user },
+        error
+    } = await supabase.auth.getUser();
 
-    return session?.user ?? null;
+    if (error) {
+        return null;
+    }
+
+    return user;
 });

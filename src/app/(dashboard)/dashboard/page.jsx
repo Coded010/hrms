@@ -8,5 +8,5 @@ export default async function DashboardIndex() {
         redirect("/");
     }
 
-    redirect("/dashboard/1/overview");
+    redirect(`/dashboard/${currentUser.id}/overview`);
 }
