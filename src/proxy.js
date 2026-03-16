@@ -10,6 +10,19 @@ export async function proxy(request) {
         return NextResponse.next();
     }
 
+    const cookies = request.cookies.getAll();
+    const hasSessionCookie = cookies.some((c) => c.name.startsWith('sb-'));
+
+    if (!hasSessionCookie && request.nextUrl.pathname.startsWith("/dashboard")) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/";
+        return NextResponse.redirect(url);
+    }
+
+    if (!hasSessionCookie && request.nextUrl.pathname === "/") {
+        return NextResponse.next();
+    }
+
     let response = NextResponse.next({
         request: {
             headers: request.headers,
@@ -21,16 +34,12 @@ export async function proxy(request) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         {
             cookies: {
-                getAll() {
-                    return request.cookies.getAll();
-                },
+                getAll() { return request.cookies.getAll(); },
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value }) =>
                         request.cookies.set(name, value),
                     );
-
                     response = NextResponse.next({ request });
-
                     cookiesToSet.forEach(({ name, value, options }) =>
                         response.cookies.set(name, value, options),
                     );
