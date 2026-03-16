@@ -1,16 +1,17 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "lib/supabase/server";
+import { cache } from "react";
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
     const supabase = await createClient();
 
     const {
         data: { user },
+        error
     } = await supabase.auth.getUser();
 
-    if (!user) {
-        redirect('/signin');
+    if (error) {
+        return null;
     }
 
     return user;
-}
+});

@@ -8,14 +8,14 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-    title: "HRMS",
-    description: "Human Resource Management System",
+    title: "Sign in",
+    description: "Enter your credentials to access your dashboard",
 };
 
 export default function RootLayout({ children }) {
     return (
         <html lang="en" data-theme="light">
-            <body className={`${poppins.variable} antialiased pl-8 pr-8`}>
+            <body className={`${poppins.variable} antialiased`}>
                 {children}
             </body>
         </html>
