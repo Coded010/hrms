@@ -10,9 +10,9 @@ export const metadata = {
 };
 
 export default async function DashboardLayout({ children }) {
-    const currentUser = await getCurrentUser();
+    const claims = await getCurrentUser();
     
-    if (!currentUser) {
+    if (!claims) {
         redirect('/');
     }
 

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
+import { getCurrentUser } from "./lib/supabase/auth/getCurrentUser";
 
 export async function proxy(request) {
     const isPrefetch = 
@@ -31,7 +32,7 @@ export async function proxy(request) {
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        process.env.NEXT_PUBLISHABLE_KEY,
         {
             cookies: {
                 getAll() { return request.cookies.getAll(); },
@@ -48,19 +49,17 @@ export async function proxy(request) {
         },
     );
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    const claims = await getCurrentUser();
 
-    if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+    if (!claims && request.nextUrl.pathname.startsWith("/dashboard")) {
         const url = request.nextUrl.clone();
         url.pathname = "/";
         return NextResponse.redirect(url);
     }
 
-    if (user && request.nextUrl.pathname === "/") {
+    if (claims && request.nextUrl.pathname === "/") {
         const url = request.nextUrl.clone();
-        url.pathname = `/dashboard/${user.id}/overview`;
+        url.pathname = `/dashboard/${claims.sub}/overview`;
         return NextResponse.redirect(url);
     }
 
