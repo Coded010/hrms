@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "lib/supabase/auth/getCurrentUser";
 
 export default async function DashboardIndex() {
-    const currentUser = await getCurrentUser();
+    const claims = await getCurrentUser();
 
-    if (!currentUser) {
+    if (!claims) {
         redirect("/");
     }
 
-    redirect(`/dashboard/${currentUser.id}/overview`);
+    redirect(`/dashboard/${claims.sub}/overview`);
 }
