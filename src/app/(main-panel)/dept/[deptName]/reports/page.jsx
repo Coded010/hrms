@@ -38,12 +38,11 @@ export default function DashboardPage() {
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
-                // If the user scrolls to the bottom, show the banner
                 if (entry.isIntersecting) {
                     setShowBanner(true);
                 }
             },
-            { threshold: 0.1 } // Trigger when 10% of the anchor is visible
+            { threshold: 0.1 }
         );
 
         if (bottomRef.current) {

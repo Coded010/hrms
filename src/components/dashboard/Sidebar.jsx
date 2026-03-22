@@ -34,9 +34,9 @@ const NAV_LINKS = [
 export default function Sidebar() {
     const pathname = usePathname();
     const params = useParams();
-    const userId = params?.id;
+    const deptName = params?.deptName;
 
-    const basePath = `/dashboard/${userId}`;
+    const basePath = `/dept/${deptName}`;
     const isActive = (href) => pathname.includes(`/${href}`);
 
     return (
