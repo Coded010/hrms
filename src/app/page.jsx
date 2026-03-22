@@ -1,7 +1,17 @@
 import SigninForm from "components/auth/SigninForm";
 import Link from "next/link";
+import { getCurrentUser } from "lib/supabase/auth/getCurrentUser";
+import { getRedirectPath } from "lib/supabase/auth/getRedirectPath";
+import { redirect } from "next/navigation";
 
 export default async function Signin() {
+    const claims = await getCurrentUser();
+
+    if (claims) {
+        const path = await getRedirectPath(claims.sub);
+        redirect(path);
+    }
+
     return (
         <main className="flex flex-col items-center justify-center h-screen gap-15">
             <div className="flex flex-col items-center gap-3">

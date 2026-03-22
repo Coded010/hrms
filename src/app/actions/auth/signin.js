@@ -2,7 +2,7 @@
 
 import { createClient } from "lib/supabase/server";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { getRedirectPath } from "lib/supabase/auth/getRedirectPath";
 
 export async function signIn({ email, password }) {
     if (!email || !password) {
@@ -11,7 +11,7 @@ export async function signIn({ email, password }) {
 
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
@@ -20,6 +20,6 @@ export async function signIn({ email, password }) {
         throw new Error(error.message);
     }
 
-    revalidatePath("/", "layout");
-    redirect("/");
+    const path = await getRedirectPath(user.id);
+    redirect(path);
 }

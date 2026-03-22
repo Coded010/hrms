@@ -41,16 +41,29 @@ export default function Field( {
     <div className='flex flex-col gap-1 w-full'>
       <div className={`relative flex items-center rounded-md px-3 py-2 transition-all duration-300 border ${config.container}`}>
 
-        <input
-          type={type}
-          placeholder={placeholder}
-          disabled={disabled || currentState === 'disabled'}
-          className='bg-transparent border-none outline-none appearance-none w-full text-gray-900 disabled:cursor-not-allowed'
-          {...registration}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          {...props}
-        />
+        {type === 'select' ? (
+          <select
+            disabled={disabled || currentState === 'disabled'}
+            className='bg-transparent border-none outline-none w-full text-gray-900 disabled:cursor-not-allowed'
+            {...registration}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            {...props}
+          >
+            {props.children}
+          </select>
+        ) : (
+          <input
+            type={type}
+            placeholder={placeholder}
+            disabled={disabled || currentState === 'disabled'}
+            className='bg-transparent border-none outline-none appearance-none w-full text-gray-900 disabled:cursor-not-allowed'
+            {...registration}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            {...props}
+          />
+        )}
 
         {config.icon && <div className='ml-2 shrink-0'>{config.icon}</div>}
       </div>

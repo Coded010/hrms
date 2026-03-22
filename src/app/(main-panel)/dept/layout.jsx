@@ -9,11 +9,11 @@ export const metadata = {
     description: "Department Management System",
 };
 
-export default async function DashboardLayout({ children }) {
+export default async function DeptLayout({ children }) {
     const claims = await getCurrentUser();
-    
+
     if (!claims) {
-        redirect('/');
+        redirect("/");
     }
 
     // TODO: fetch real user data from Supabase using `id`

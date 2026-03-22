@@ -20,6 +20,8 @@ export default function SignupForm() {
         defaultValues: {
             firstName: "",
             lastName: "",
+            department: "",
+            role: "",
             email: "",
             password: "",
         },
@@ -29,12 +31,16 @@ export default function SignupForm() {
     const [focusFields, setFocusFields] = useState({
         firstName: false,
         lastName: false,
+        department: false,
+        role: false,
         email: false,
         password: false,
     });
 
     const firstNameValue = useWatch({ control, name: "firstName" }) || "";
     const lastNameValue = useWatch({ control, name: "lastName" }) || "";
+    const departmentValue = useWatch({ control, name: "department" }) || "";
+    const roleValue = useWatch({ control, name: "role" }) || "";
     const emailValue = useWatch({ control, name: "email" }) || "";
     const passwordValue = useWatch({ control, name: "password" }) || "";
 
@@ -61,6 +67,18 @@ export default function SignupForm() {
         lastNameValue,
         errors.lastName,
         focusFields.lastName,
+    );
+    const departmentInfo = getCurrentInputState(
+        "department",
+        departmentValue,
+        errors.department,
+        focusFields.department,
+    );
+    const roleInfo = getCurrentInputState(
+        "role",
+        roleValue,
+        errors.role,
+        focusFields.role,
     );
     const emailInfo = getCurrentInputState(
         "email",
@@ -100,6 +118,42 @@ export default function SignupForm() {
                 onFocus={() => setFocus("lastName", true)}
                 onBlur={() => setFocus("lastName", false)}
             />
+            <Field
+                type="select"
+                registration={register("department")}
+                state={departmentInfo.state}
+                message={departmentInfo.message}
+                disabled={isSubmitting}
+                onFocus={() => setFocus("department", true)}
+                onBlur={() => setFocus("department", false)}
+            >
+                <option value="" disabled>Select Department</option>
+                <option value="BSCS">BSCS</option>
+                <option value="BSN">BSN</option>
+                <option value="BSA">BSA</option>
+                <option value="BSBA">BSBA</option>
+                <option value="BSED">BSED</option>
+                <option value="BEED">BEED</option>
+                <option value="BSCRIM">BSCRIM</option>
+            </Field>
+            <Field
+                type="select"
+                registration={register("role")}
+                state={roleInfo.state}
+                message={roleInfo.message}
+                disabled={isSubmitting}
+                onFocus={() => setFocus("role", true)}
+                onBlur={() => setFocus("role", false)}
+            >
+                <option value="" disabled>Select Role</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="HR">HR</option>
+                <option value="FINANCE">FINANCE</option>
+                <option value="DEAN">DEAN</option>
+                <option value="PROFESSOR">PROFESSOR</option>
+                <option value="INSTRUCTOR">INSTRUCTOR</option>
+                <option value="TEACHER">TEACHER</option>
+            </Field>
             <Field
                 type="email"
                 placeholder="Enter your email"
