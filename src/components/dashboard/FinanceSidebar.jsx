@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import SignOutForm from "../auth/SignoutForm";
-import { DashboardIcon, GearIcon } from "@radix-ui/react-icons";
+import SidebarUserProfile from "./SidebarUserProfile";
+import { DashboardIcon } from "@radix-ui/react-icons";
 
 const NAV_LINKS = [
     { label: "Overview", href: "overview", icon: DashboardIcon },
 ];
 
-export default function FinanceSidebar() {
+export default function FinanceSidebar({ user }) {
     const pathname = usePathname();
     const basePath = `/finance`;
     const isActive = (href) => pathname.includes(`/${href}`);
@@ -42,16 +42,7 @@ export default function FinanceSidebar() {
                     </Link>
                 ))}
             </nav>
-            <div className="py-3 px-2.5 border-t border-[#e8ede9] flex flex-col gap-0.5">
-                <Link
-                    href={`${basePath}/settings`}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-[#4a4a4a] hover:bg-[#f4faf7] transition-colors duration-150 no-underline"
-                >
-                    <GearIcon className="w-[18px] h-[18px] shrink-0 text-[#6b7280]" aria-hidden="true" />
-                    Settings
-                </Link>
-                <SignOutForm />
-            </div>
+            <SidebarUserProfile user={user} settingsHref={`${basePath}/settings`} />
         </aside>
     );
 }

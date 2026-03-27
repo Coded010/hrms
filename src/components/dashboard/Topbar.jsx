@@ -3,16 +3,7 @@
 import { MagnifyingGlassIcon, BellIcon } from "@radix-ui/react-icons";
 
 // -- Topbar component
-export default function Topbar({ user }) {
-    const initials = user?.name
-        ? user.name
-              .split(" ")
-              .map((w) => w[0])
-              .slice(0, 2)
-              .join("")
-              .toUpperCase()
-        : "U";
-
+export default function Topbar() {
     return (
         <header
             className="h-16 min-h-16 bg-white border-b border-[#e8ede9] flex items-center px-6 gap-4 z-10"
@@ -50,41 +41,6 @@ export default function Topbar({ user }) {
                 >
                     <BellIcon width={17} height={17} aria-hidden="true" />
                 </button>
-
-                <div className="w-px h-8 bg-[#e8ede9]" aria-hidden="true" />
-
-                {/* User info */}
-                <div
-                    className="flex items-center gap-2.5 cursor-pointer px-1.5 py-1 rounded-[10px] transition-colors duration-150 hover:bg-[#f4faf7]"
-                    role="button"
-                    tabIndex={0}
-                    aria-label="User menu"
-                >
-                    <div className="text-right">
-                        <p className="text-[13px] font-semibold text-[#202020] leading-tight">
-                            {user?.name ?? "Dr. John Doe"}
-                        </p>
-                        <p className="text-[11px] text-[#6b7280] leading-tight">
-                            {user?.role ?? "Dean, College of Computer Studies"}
-                        </p>
-                    </div>
-
-                    <div
-                        className="w-9 h-9 rounded-full bg-linear-to-br from-[#5bb98b] to-[#3da870] flex items-center justify-center text-[13px] font-bold text-white shrink-0 overflow-hidden border-2 border-[#e9f7f1]"
-                        aria-hidden="true"
-                    >
-                        {user?.avatarUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                src={user.avatarUrl}
-                                alt={user.name}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <span>{initials}</span>
-                        )}
-                    </div>
-                </div>
             </div>
         </header>
     );
