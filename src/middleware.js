@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function proxy(request) {
+export default async function proxy(request) {
     const isPrefetch =
         request.headers.get("next-router-prefetch") === "1" ||
         request.headers.get("purpose") === "prefetch";

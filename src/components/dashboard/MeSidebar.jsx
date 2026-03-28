@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SidebarUserProfile from "./SidebarUserProfile";
-import { DashboardIcon } from "@radix-ui/react-icons";
+import { DashboardIcon, CheckboxIcon } from "@radix-ui/react-icons";
 
 const NAV_LINKS = [
     { label: "Overview", href: "overview", icon: DashboardIcon },
+    { label: "Pending Approvals", href: "pending-approvals", icon: CheckboxIcon },
 ];
 
 export default function MeSidebar({ user }) {
