@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { signUp } from "actions/auth/signup";
 import { useForm, useWatch } from "react-hook-form";
 import { signUpSchema } from "lib/validation/schemas";
@@ -28,8 +27,6 @@ export default function SignupForm() {
         mode: "onBlur",
     });
 
-    const [isPending, startTransition] = useTransition();
-
     const [focusFields, setFocusFields] = useState({
         firstName: false,
         lastName: false,
@@ -47,13 +44,11 @@ export default function SignupForm() {
     const passwordValue = useWatch({ control, name: "password" }) || "";
 
     const onSubmit = async (data) => {
-        startTransition(async () => {
-            try {
-                await signUp(data);
-            } catch (error) {
-                console.error("Sign-up error:", error);
-            }
-        });
+        try {
+            await signUp(data);
+        } catch (error) {
+            console.error("Sign-up error:", error);
+        }
     };
 
     const setFocus = (field, isFocused) => {
@@ -110,7 +105,7 @@ export default function SignupForm() {
                     registration={register("firstName")}
                     state={firstNameInfo.state}
                     message={firstNameInfo.message}
-                    disabled={isSubmitting || isPending}
+                    disabled={isSubmitting}
                     onFocus={() => setFocus("firstName", true)}
                     onBlur={() => setFocus("firstName", false)}
                 />
@@ -120,7 +115,7 @@ export default function SignupForm() {
                     registration={register("lastName")}
                     state={lastNameInfo.state}
                     message={lastNameInfo.message}
-                    disabled={isSubmitting || isPending}
+                    disabled={isSubmitting}
                     onFocus={() => setFocus("lastName", true)}
                     onBlur={() => setFocus("lastName", false)}
                 />
@@ -129,7 +124,7 @@ export default function SignupForm() {
                     registration={register("department")}
                     state={departmentInfo.state}
                     message={departmentInfo.message}
-                    disabled={isSubmitting || isPending}
+                    disabled={isSubmitting}
                     onFocus={() => setFocus("department", true)}
                     onBlur={() => setFocus("department", false)}
                 >
@@ -147,7 +142,7 @@ export default function SignupForm() {
                     registration={register("role")}
                     state={roleInfo.state}
                     message={roleInfo.message}
-                    disabled={isSubmitting || isPending}
+                    disabled={isSubmitting}
                     onFocus={() => setFocus("role", true)}
                     onBlur={() => setFocus("role", false)}
                 >
@@ -168,7 +163,7 @@ export default function SignupForm() {
                         registration={register("email")}
                         state={emailInfo.state}
                         message={emailInfo.message}
-                        disabled={isSubmitting || isPending}
+                        disabled={isSubmitting}
                         onFocus={() => setFocus("email", true)}
                         onBlur={() => setFocus("email", false)}
                     />
@@ -181,7 +176,7 @@ export default function SignupForm() {
                         registration={register("password")}
                         state={passwordInfo.state}
                         message={passwordInfo.message}
-                        disabled={isSubmitting || isPending}
+                        disabled={isSubmitting}
                         onFocus={() => setFocus("password", true)}
                         onBlur={() => setFocus("password", false)}
                     />
@@ -192,9 +187,9 @@ export default function SignupForm() {
             <button
                 type="submit"
                 className="btn btn-primary btn-md sm:btn-lg w-full mt-2"
-                disabled={isSubmitting || isPending}
+                disabled={isSubmitting}
             >
-                {(isSubmitting || isPending) ? (
+                {isSubmitting ? (
                     <>
                         <span className="loading loading-spinner"></span>
                         Signing up...
