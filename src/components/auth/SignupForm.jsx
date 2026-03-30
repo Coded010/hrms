@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { signUp } from "actions/auth/signup";
 import { useForm, useWatch } from "react-hook-form";

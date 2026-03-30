@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
-import SignOutForm from "../auth/SignoutForm";
+import SidebarUserProfile from "./SidebarUserProfile";
 import {
     DashboardIcon,
     PersonIcon,
     DesktopIcon,
     CheckboxIcon,
     BarChartIcon,
-    GearIcon,
-    ExitIcon,
 } from "@radix-ui/react-icons";
 
 // -- Nav link definitions
@@ -31,7 +29,7 @@ const NAV_LINKS = [
 ];
 
 // -- Sidebar component
-export default function Sidebar() {
+export default function Sidebar({ user }) {
     const pathname = usePathname();
     const params = useParams();
     const deptName = params?.deptName;
@@ -83,21 +81,8 @@ export default function Sidebar() {
                 ))}
             </nav>
 
-            {/* Bottom actions */}
-            <div className="py-3 px-2.5 border-t border-[#e8ede9] flex flex-col gap-0.5">
-                <Link
-                    href={`${basePath}/settings`}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-[#4a4a4a] hover:bg-[#f4faf7] transition-colors duration-150 no-underline"
-                >
-                    <GearIcon
-                        className="w-[18px] h-[18px] shrink-0 text-[#6b7280]"
-                        aria-hidden="true"
-                    />
-                    Settings
-                </Link>
-
-                <SignOutForm />
-            </div>
+            {/* Bottom profile with settings/logout popover */}
+            <SidebarUserProfile user={user} settingsHref={`${basePath}/settings`} />
         </aside>
     );
 }

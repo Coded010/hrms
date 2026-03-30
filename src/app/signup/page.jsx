@@ -50,7 +50,7 @@ export default function Signup() {
         
         <figure className="hidden lg:flex flex-col border-l border-neutral/10 w-1/2 bg-[#5BB98B]/20">
         <div className="flex flex-1 items-center justify-center p-10">
-          <div className="h-full w-full bg-[url('/auth-illus.png')] bg-contain bg-center bg-no-repeat" />
+        <div className="h-full w-full bg-[url('/temporary-bg.png')] bg-contain bg-center bg-no-repeat" />
         </div>
       </figure>
     </main>

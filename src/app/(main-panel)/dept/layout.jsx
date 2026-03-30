@@ -26,11 +26,11 @@ export default async function DeptLayout({ children }) {
     return (
         <div className="flex h-screen w-full overflow-hidden">
             {/* Left — fixed sidebar */}
-            <Sidebar />
+            <Sidebar user={user} />
 
             {/* Right — topbar + scrollable content + footer */}
             <div className="flex flex-col flex-1 h-screen overflow-hidden min-w-0">
-                <Topbar user={user} />
+                <Topbar />
 
                 <main
                     className="flex-1 overflow-y-auto p-7 bg-[#f8fbf9]"
