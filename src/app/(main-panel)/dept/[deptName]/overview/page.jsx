@@ -1,4 +1,4 @@
-import StatGrid from './mock/OverviewGrid'
+import StatusGrid from './mock/OverviewGrid'
 
 export default function DashboardPage() {
     return (
@@ -7,7 +7,7 @@ export default function DashboardPage() {
             <p className="text-sm" style={{ color: "var(--user-role-color)" }}>
                 Real-time faculty management and class coverage status.
             </p>
-            <StatGrid/>
+            <StatusGrid/>
         </div>
     );
 }
