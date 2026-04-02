@@ -216,7 +216,7 @@ export default function FacultyManagementPage() {
                         onMouseLeave={e => e.currentTarget.style.background = "#5BB98B"}
                     >
                         <UserPlus className="size-3.5" />
-                        Add Faculty
+                        Endorse Hire
                     </button>
                 </div>
             </div>
