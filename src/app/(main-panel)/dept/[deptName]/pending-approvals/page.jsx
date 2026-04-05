@@ -73,24 +73,14 @@ export default async function PendingApprovalsPage({ params }) {
         };
     });
 
-    // Fetch pending class coverage (schedule adjustments) for this department
-    const { data: coverage, error: ccError } = await supabase
-        .from("class_coverage")
-        .select("id, coverage_date, notes, schedules(subject_code, subject_name, room, section, day_of_week), employees(first_name, last_name)")
-        .eq("status", "pending")
-        .eq("schedules.day_of_week.gte", 1)
-        .order("coverage_date", { ascending: true });
-
-    // Actually, class_coverage is linked to schedules, and schedules are linked to employees via employee_id.
-    // We need to join through schedules to filter by department.
+    // Fetch pending class coverage requests for this department
     const { data: pendingCoverage, error: pcError } = await supabase
         .from("class_coverage")
         .select("id, coverage_date, notes, schedules(subject_code, subject_name, room, section, day_of_week, employees(first_name, last_name))")
         .eq("status", "pending")
         .order("coverage_date", { ascending: true });
 
-    if (ccError) console.error("PendingApprovalsPage: class coverage error", ccError);
-    if (pcError) console.error("PendingApprovalsPage: pending coverage error", pcError);
+    if (pcError) console.error("PendingApprovalsPage: class coverage error", pcError);
 
     const scheduleItems = (pendingCoverage || []).map((cc) => {
         const sched = cc.schedules;

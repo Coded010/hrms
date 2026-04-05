@@ -18,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
     return (
         <html lang="en" data-theme="light" className={cn("font-sans", geist.variable)}>
-            <body className={`${poppins.variable} antialiased`}>
+            <body className={`${poppins.variable} antialiased`} suppressHydrationWarning>
                 {children}
             </body>
         </html>

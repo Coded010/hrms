@@ -1,10 +1,18 @@
 "use server";
 
-import { createClient } from "lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createClient as createSSRClient } from "lib/supabase/server";
+import { revalidatePath } from "next/cache";
+
+function getServiceClient() {
+    return createServiceClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+}
 
 export async function approveLeave(requestId) {
-    const supabase = await createClient();
-
+    const supabase = getServiceClient();
     const { error } = await supabase
         .from("leave_requests")
         .update({ status: "approved", reviewed_at: new Date().toISOString() })
@@ -14,12 +22,12 @@ export async function approveLeave(requestId) {
         console.error("approveLeave error:", error);
         return false;
     }
+    revalidatePath("/dept/[deptName]/pending-approvals");
     return true;
 }
 
 export async function declineLeave(requestId) {
-    const supabase = await createClient();
-
+    const supabase = getServiceClient();
     const { error } = await supabase
         .from("leave_requests")
         .update({ status: "rejected", reviewed_at: new Date().toISOString() })
@@ -29,12 +37,12 @@ export async function declineLeave(requestId) {
         console.error("declineLeave error:", error);
         return false;
     }
+    revalidatePath("/dept/[deptName]/pending-approvals");
     return true;
 }
 
 export async function approveCoverage(coverageId) {
-    const supabase = await createClient();
-
+    const supabase = getServiceClient();
     const { error } = await supabase
         .from("class_coverage")
         .update({ status: "assigned" })
@@ -44,12 +52,12 @@ export async function approveCoverage(coverageId) {
         console.error("approveCoverage error:", error);
         return false;
     }
+    revalidatePath("/dept/[deptName]/class-coverage");
     return true;
 }
 
 export async function declineCoverage(coverageId) {
-    const supabase = await createClient();
-
+    const supabase = getServiceClient();
     const { error } = await supabase
         .from("class_coverage")
         .update({ status: "resolved" })
@@ -59,5 +67,6 @@ export async function declineCoverage(coverageId) {
         console.error("declineCoverage error:", error);
         return false;
     }
+    revalidatePath("/dept/[deptName]/class-coverage");
     return true;
 }

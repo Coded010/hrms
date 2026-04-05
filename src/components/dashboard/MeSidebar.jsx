@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SidebarUserProfile from "./SidebarUserProfile";
-import { DashboardIcon } from "@radix-ui/react-icons";
+import { DashboardIcon, CalendarIcon, FileTextIcon, PaperPlaneIcon } from "@radix-ui/react-icons";
 
 const NAV_LINKS = [
     { label: "Overview", href: "overview", icon: DashboardIcon },
-    { label: "My Request", href: "my-request", icon: DashboardIcon }
+    { label: "Attendance", href: "attendance", icon: CalendarIcon },
+    { label: "My Requests", href: "my-request", icon: FileTextIcon },
+    { label: "Documents", href: "documents", icon: PaperPlaneIcon },
 ];
 
 export default function MeSidebar({ user }) {

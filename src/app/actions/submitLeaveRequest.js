@@ -1,12 +1,12 @@
 "use server";
 
-import { createClient } from "lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createClient as createSSRClient } from "lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function submitLeaveRequest(formData) {
-    const supabase = await createClient();
-
-    const { data: user, error: userError } = await supabase.auth.getUser();
+    const authSupabase = await createSSRClient();
+    const { data: user, error: userError } = await authSupabase.auth.getUser();
     if (userError || !user?.user) {
         return { success: false, message: "Not authenticated" };
     }
@@ -23,6 +23,11 @@ export async function submitLeaveRequest(formData) {
     if (new Date(end_date) < new Date(start_date)) {
         return { success: false, message: "End date must be on or after start date." };
     }
+
+    const supabase = createServiceClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
     const { error } = await supabase.from("leave_requests").insert({
         employee_id: employeeId,

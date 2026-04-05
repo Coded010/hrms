@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { submitLeaveRequest } from "actions/submitLeaveRequest";
 import { X, CheckCircle2, AlertCircle } from "lucide-react";
-import { useWatch } from "react-hook-form";
 
 const LEAVE_TYPES = [
     { value: "vacation", label: "Vacation Leave", balanceType: "vacation" },
@@ -29,7 +28,7 @@ const BALANCE_LABELS = {
     emergency: "Emergency Leave",
 };
 
-export default function NewRequestModal({ open, onClose, balances }) {
+export default function NewRequestModal({ open, onClose, balances, defaultType = "vacation" }) {
     const [feedback, setFeedback] = useState(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -43,7 +42,7 @@ export default function NewRequestModal({ open, onClose, balances }) {
         resolver: zodResolver(schema),
         mode: "onBlur",
         defaultValues: {
-            leave_type: "",
+            leave_type: defaultType,
             start_date: "",
             end_date: "",
             reason: "",
@@ -51,6 +50,19 @@ export default function NewRequestModal({ open, onClose, balances }) {
     });
 
     const watchLeaveType = useWatch({ control, name: "leave_type" });
+
+    // Reset form when modal opens with a new defaultType
+    useEffect(() => {
+        if (open) {
+            reset({
+                leave_type: defaultType,
+                start_date: "",
+                end_date: "",
+                reason: "",
+            });
+            setFeedback(null);
+        }
+    }, [open, defaultType, reset]);
 
     const onSubmit = async (data) => {
         setFeedback(null);
