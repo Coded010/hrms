@@ -1,5 +1,16 @@
 import { InfoIcon } from "lucide-react"
 
+function Avatar({ initials }) {
+  return (
+    <div
+      className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+      style={{ background: "#e6f4ed", color: "#218358" }}
+    >
+      {initials}
+    </div>
+  )
+}
+
 export default function ScheduleCard( { data } ) {
   return (
     <main className="border border-gray-200 rounded-b-xl shadow-sm border-t-4 border-t-red-500 bg-white">
@@ -15,7 +26,7 @@ export default function ScheduleCard( { data } ) {
             </p>
           </div>
         </div>
-        
+
         <div className="badge badge-md badge-error border-none rounded-full py-3 px-4 font-semibold text-white">
           Critical Action Needed
         </div>
@@ -33,7 +44,7 @@ export default function ScheduleCard( { data } ) {
             </tr>
           </thead>
 
-          <tbody> 
+          <tbody>
             {data.map((item) => (
               <tr key={item.id} className="hover:bg-gray-50 border-b border-gray-50">
                 <td className="py-4">
@@ -43,7 +54,10 @@ export default function ScheduleCard( { data } ) {
                   {item.subject}
                 </td>
                 <td className="text-neutral/50 italic">
-                  {item.professor}
+                  <div className="flex items-center gap-2">
+                    {item.initials && <Avatar initials={item.initials} />}
+                    {item.professor}
+                  </div>
                 </td>
                 <td className="text-end">
                   <button className="btn btn-sm bg-red-500 hover:bg-red-600 text-white border-none px-4">

@@ -1,250 +1,143 @@
-"use client";
-import React from 'react';
-import { 
-    Monitor, Filter, CheckCircle2, MoreVertical, 
-    MapPin, Clock, ArrowRight, AlertCircle, Phone 
-} from 'lucide-react';
+import { createAdminClient } from "lib/supabase/admin";
+import ClassCoverageBody from "./ClassCoverageBody";
 
-function Avatar({ initials }) {
-    return (
-        <div
-            className="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold"
-            style={{ background: "#e6f4ed", color: "#218358" }}
-        >
-            {initials}
-        </div>
-    )
+function formatTime12(timeStr) {
+    if (!timeStr) return "";
+    const [h, m] = timeStr.split(":").map(Number);
+    const ampm = h >= 12 ? "PM" : "AM";
+    const hour = h % 12 || 12;
+    return `${hour}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
-const ongoingClasses = [
-    {
-        id: "CS-101",
-        room: "Lab 204",
-        instructor: "Dr. Sarah Jenkins",
-        time: "09:00 AM - 10:30 AM",
-        checkIn: "8:54 AM",
-        initials: "SJ"
-    },
-    {
-        id: "IT-302",
-        room: "Room 401",
-        instructor: "Prof. Mark V.",
-        time: "09:30 AM - 11:00 AM",
-        checkIn: "8:54 AM",
-        initials: "MV"
-    },
-    {
-        id: "CYB-210",
-        room: "Theater B",
-        instructor: "Dr. Emily Chen",
-        time: "09:00 AM - 11:00 AM",
-        checkIn: "8:54 AM",
-        initials: "EC"
-    },
-    {
-        id: "DATA-11",
-        room: "Room 102",
-        instructor: "James Wilson",
-        time: "09:00 AM - 10:30 AM",
-        checkIn: "8:54 AM",
-        initials: "JW"
-    }
-];
+export default async function ClassCoveragePage({ params }) {
+    const supabase = createAdminClient();
+    const { deptName } = await params;
 
-const upcomingClasses = [
-    {
-        id: "NET-105",
-        room: "Lab 305",
-        instructor: "Robert Fox",
-        time: "11:00 AM - 12:30 PM",
-        initials: "RF"
-    },
-    {
-        id: "AI-400",
-        room: "Room 502",
-        instructor: "Dr. Elena S.",
-        time: "11:00 AM - 01:00 PM",
-        initials: "ES"
-    },
-    {
-        id: "ETH-100",
-        room: "Room 211",
-        instructor: "Michael P.",
-        time: "11:30 AM - 01:00 PM",
-        initials: "MP"
-    }
-];
+    // Get department ID (case-insensitive match, handles URL encoding)
+    const resolvedDeptName = deptName ? decodeURIComponent(deptName) : "";
+    const { data: dept, error: deptError } = await supabase
+        .from("departments")
+        .select("id, name")
+        .ilike("name", resolvedDeptName)
+        .single();
 
-const unattendedAlerts = [
-    {
-        id: "CS-205",
-        room: "Room 312",
-        instructor: "Kevin Adams",
-        time: "09:00 AM - 11:00 AM",
-        initials: "KA"
-    },
-    {
-        id: "WEB-101",
-        room: "Lab 101",
-        instructor: "Jessica Lee",
-        time: "09:30 AM - 11:00 AM",
-        initials: "JL"
+    if (!dept) {
+        console.error("ClassCoveragePage: dept lookup failed for", resolvedDeptName, deptError);
+        return <div className="p-8 text-gray-500">Department &quot;{resolvedDeptName}&quot; not found.</div>;
     }
-];
 
-export default function ClassCoveragePage() {
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0]; // YYYY-MM-DD
+    const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon ... 6=Sat
+    const jsDayToDbDay = dayOfWeek === 0 ? 7 : dayOfWeek; // Convert to 1=Mon...7=Sun
+
+    // Fetch all employees in this department
+    const { data: deptEmployees } = await supabase
+        .from("employees")
+        .select("id, first_name, last_name, middle_name, email")
+        .eq("dept_id", dept.id);
+
+    const empIds = (deptEmployees || []).map((e) => e.id);
+    const empMap = new Map();
+    for (const emp of deptEmployees || []) {
+        empMap.set(emp.id, emp);
+    }
+
+    console.log("ClassCoverage: deptEmployees =", deptEmployees?.length || 0);
+
+    // Fetch all schedules for today in this department
+    const { data: allSchedules, error: schedError } = await supabase
+        .from("schedules")
+        .select("id, subject_code, subject_name, day_of_week, start_time, end_time, room, section, employee_id")
+        .eq("day_of_week", jsDayToDbDay)
+        .in("employee_id", empIds.length > 0 ? empIds : ["00000000-0000-0000-0000-000000000000"])
+        .order("start_time", { ascending: true });
+
+    console.log("ClassCoverage: dept.id =", dept.id, "jsDayToDbDay =", jsDayToDbDay);
+    console.log("ClassCoverage: schedules =", allSchedules?.length || 0, "error =", schedError);
+
+    if (schedError) {
+        console.error("ClassCoveragePage: schedule fetch error", schedError);
+        return <div className="p-8 text-red-500">Failed to load schedule data.</div>;
+    }
+
+    // Fetch today's attendance logs for all employees in this department
+    let attendanceLogs = [];
+    if (empIds.length > 0) {
+        const { data: logs } = await supabase
+            .from("attendance_logs")
+            .select("employee_id, time_in, time_out, status")
+            .eq("log_date", todayStr)
+            .in("employee_id", empIds);
+        attendanceLogs = logs || [];
+    }
+
+    const clockedInMap = new Map();
+    for (const log of attendanceLogs) {
+        clockedInMap.set(log.employee_id, { time_in: log.time_in, time_out: log.time_out, status: log.status });
+    }
+
+    // Categorize classes
+    const now = today;
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const toMinutes = (timeStr) => {
+        if (!timeStr) return Infinity;
+        const [h, m] = timeStr.split(":").map(Number);
+        return h * 60 + m;
+    };
+
+    const ongoing = [];
+    const upcoming = [];
+    const unattended = [];
+
+    for (const sched of allSchedules || []) {
+        const emp = empMap.get(sched.employee_id);
+        const fullName = emp ? [emp.first_name, emp.middle_name, emp.last_name].filter(Boolean).join(" ") : "Unknown";
+        const initials = emp ? [emp.first_name, emp.last_name].filter(Boolean).map((n) => n[0]).join("") : "??";
+        const empId = sched.employee_id;
+        const startMin = toMinutes(sched.start_time);
+        const endMin = toMinutes(sched.end_time);
+        const clockedIn = clockedInMap.get(empId);
+        const isClockedIn = clockedIn && clockedIn.time_in;
+
+        const card = {
+            id: sched.subject_code,
+            room: sched.room,
+            section: sched.section,
+            instructor: fullName,
+            time: `${formatTime12(sched.start_time)} - ${formatTime12(sched.end_time)}`,
+            initials,
+            employeeId: empId,
+        };
+
+        if (currentMinutes >= startMin && currentMinutes < endMin) {
+            // Currently in session
+            if (isClockedIn) {
+                ongoing.push({ ...card, checkIn: formatTime12(clockedIn.time_in) });
+            } else {
+                unattended.push(card);
+            }
+        } else if (currentMinutes < startMin && (startMin - currentMinutes) <= 90) {
+            // Starting within 90 minutes
+            upcoming.push(card);
+        } else if (currentMinutes >= startMin && !isClockedIn) {
+            // Session should have started but no clock-in
+            unattended.push(card);
+        }
+    }
+
+    const totalScheduled = allSchedules?.length || 0;
+    const operationalEfficiency = totalScheduled > 0
+        ? Math.round(((ongoing.length + upcoming.length) / totalScheduled) * 100)
+        : 100;
+
     return (
-        <div className="flex flex-col gap-5">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-start justify-between mb-8 pb-6 border-b border-gray-200">
-                <div className="flex flex-col gap-1 text-gray-800">
-                    <div className="flex items-center gap-2 font-semibold text-sm" style={{ color: "var(--user-role-color, #10b981)" }}>
-                        <Monitor className="w-4 h-4" />
-                        <span>Real-time Tracking</span>
-                    </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mt-1">Class Coverage</h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Monitoring 45 scheduled classes for today. Operational efficiency at <span className="font-bold whitespace-nowrap" style={{ color: "var(--user-role-color, #10b981)" }}>95.6%.</span>
-                    </p>
-                </div>
-                <div className="flex items-center gap-3 mt-4 md:mt-0">
-                    <button className="btn bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 shadow-sm flex items-center gap-2 font-medium px-4 py-2 rounded-lg transition-colors">
-                        <Filter className="w-4 h-4" /> Filter by Building
-                    </button>
-                    <button 
-                        className="btn text-white shadow-sm flex items-center gap-2 font-medium px-4 py-2 rounded-lg transition-colors border-none"
-                        style={{ backgroundColor: "var(--user-role-color, #10b981)" }}
-                    >
-                        Broadcast Announcement
-                    </button>
-                </div>
-            </div>
-
-            {/* Main Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                {/* Column 1: Ongoing */}
-                <div className="flex flex-col gap-4 border-r border-dotted border-gray-200 pr-0 lg:pr-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Classes Ongoing</h2>
-                            <span className="bg-gray-100 text-gray-600 text-xs py-0.5 px-2 rounded-full font-bold">4</span>
-                        </div>
-                        <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
-                    </div>
-
-                    {ongoingClasses.map(card => (
-                        <div key={card.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] flex flex-col">
-                            <div className="p-4 flex flex-col gap-3">
-                                <div className="flex justify-between items-start">
-                                    <h3 className="font-bold text-lg text-gray-900">{card.id}</h3>
-                                    <span className="inline-flex items-center gap-1.5 border border-gray-200 px-2.5 py-1 rounded-full text-xs font-medium text-gray-700 bg-white">
-                                        <CheckCircle2 className="w-3.5 h-3.5 text-gray-600" /> Clocked In
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-gray-500 text-xs font-medium">
-                                    <MapPin className="w-3.5 h-3.5" /> {card.room}
-                                </div>
-                                <div className="flex items-center gap-3 mt-2">
-                                    <Avatar initials={card.initials} />
-                                    <div className="flex flex-col gap-0.5">
-                                        <span className="text-sm font-bold text-gray-800">{card.instructor}</span>
-                                        <div className="flex items-center gap-1 text-gray-500 text-xs font-medium">
-                                            <Clock className="w-3.5 h-3.5" /> {card.time}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="border-t border-gray-100 px-4 py-3 flex items-center justify-between bg-gray-50/50">
-                                <span className="text-xs text-gray-500 font-medium">Check-In: {card.checkIn}</span>
-                                <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Column 2: Upcoming */}
-                <div className="flex flex-col gap-4 border-r border-dotted border-gray-200 pr-0 lg:pr-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Upcoming Next Hour</h2>
-                            <span className="bg-gray-100 text-gray-600 text-xs py-0.5 px-2 rounded-full font-bold">3</span>
-                        </div>
-                        <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
-                    </div>
-
-                    {upcomingClasses.map(card => (
-                        <div key={card.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] flex flex-col p-4 gap-3">
-                            <div className="flex justify-between items-start">
-                                <h3 className="font-bold text-lg text-gray-900">{card.id}</h3>
-                                <span className="inline-flex items-center gap-1.5 border border-gray-200 px-2.5 py-1 rounded-full text-xs font-medium text-gray-700 bg-white">
-                                    <Clock className="w-3.5 h-3.5 text-gray-500" /> Standby
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-gray-500 text-xs font-medium">
-                                <MapPin className="w-3.5 h-3.5" /> {card.room}
-                            </div>
-                            <div className="flex items-center gap-3 mt-2">
-                                <Avatar initials={card.initials} />
-                                <div className="flex flex-col gap-0.5">
-                                    <span className="text-sm font-bold text-gray-800">{card.instructor}</span>
-                                    <div className="flex items-center gap-1 text-gray-500 text-xs font-medium">
-                                        <Clock className="w-3.5 h-3.5" /> {card.time}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="pt-3 border-t border-gray-100 mt-2 flex justify-center">
-                                <button className="text-sm font-bold flex items-center gap-1 hover:underline transition-all" style={{ color: "var(--user-role-color, #10b981)" }}>
-                                    View Details <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Column 3: Unattended / Alerts */}
-                <div className="flex flex-col gap-4 rounded-2xl p-4 lg:p-6 bg-[#fdf2f2] border border-dotted border-red-200">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-sm font-bold text-red-600 uppercase tracking-wider">Unattended / Alerts</h2>
-                            <span className="bg-red-500 text-white text-xs py-0.5 px-2.5 rounded-full font-bold">2</span>
-                        </div>
-                        <button className="text-red-400 hover:text-red-700"><MoreVertical className="w-4 h-4" /></button>
-                    </div>
-
-                    {unattendedAlerts.map(card => (
-                        <div key={card.id} className="bg-white/80 backdrop-blur-sm border border-red-200 rounded-xl overflow-hidden shadow-sm flex flex-col p-4 gap-4">
-                            <div className="flex justify-between items-start">
-                                <h3 className="font-bold text-lg text-gray-900">{card.id}</h3>
-                                <span className="inline-flex items-center gap-1 shadow-sm px-2.5 py-0.5 rounded-full text-xs font-bold text-white bg-red-500">
-                                    <AlertCircle className="w-3.5 h-3.5" /> Missing
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-gray-600 text-xs font-medium">
-                                <MapPin className="w-3.5 h-3.5" /> {card.room}
-                            </div>
-                            <div className="flex items-center gap-3 mt-1">
-                                <Avatar initials={card.initials} />
-                                <div className="flex flex-col gap-0.5">
-                                    <span className="text-sm font-bold text-gray-900">{card.instructor}</span>
-                                    <div className="flex items-center gap-1 text-gray-600 text-xs font-medium">
-                                        <Clock className="w-3.5 h-3.5" /> {card.time}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3 border-t border-red-100 mt-2 pt-4">
-                                <button className="bg-[#e44654] hover:bg-red-600 text-white font-bold py-2.5 px-4 rounded-lg flex-1 text-sm shadow-sm transition-colors text-center uppercase tracking-wider">
-                                    Assign Sub
-                                </button>
-                                <button className="border border-red-200 bg-white text-[#e44654] hover:bg-red-50 p-2.5 rounded-lg shadow-sm transition-colors">
-                                    <Phone className="w-5 h-5" />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-            </div>
-        </div>
+        <ClassCoverageBody
+            ongoing={ongoing}
+            upcoming={upcoming}
+            unattended={unattended}
+            totalScheduled={totalScheduled}
+            operationalEfficiency={operationalEfficiency}
+        />
     );
 }
