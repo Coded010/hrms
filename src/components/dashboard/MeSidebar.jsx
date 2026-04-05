@@ -6,7 +6,8 @@ import SidebarUserProfile from "./SidebarUserProfile";
 import { DashboardIcon } from "@radix-ui/react-icons";
 
 const NAV_LINKS = [
-    { label: "Overview", href: "overview", icon: DashboardIcon }
+    { label: "Overview", href: "overview", icon: DashboardIcon },
+    { label: "My Request", href: "my-request", icon: DashboardIcon }
 ];
 
 export default function MeSidebar({ user }) {

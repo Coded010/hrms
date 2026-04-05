@@ -5,15 +5,28 @@ import { createClient } from "lib/supabase/server";
 export async function approveLeave(requestId) {
     const supabase = await createClient();
 
-    const { error } = await supabase
+    // Fetch the leave request details
+    const { data: request, error: fetchError } = await supabase
         .from("leave_requests")
-        .update({ status: "approved", reviewed_at: new Date().toISOString() })
-        .eq("id", requestId);
+        .select("employee_id, leave_type, start_date, end_date")
+        .eq("id", requestId)
+        .single();
 
-    if (error) {
-        console.error("approveLeave error:", error);
+    if (fetchError || !request) {
+        console.error("approveLeave fetch error:", fetchError);
         return false;
     }
+
+    // Call atomic DB function: updates status + increments used_days
+    const { error: updateError } = await supabase.rpc("approve_leave_request", {
+        p_request_id: requestId,
+    });
+
+    if (updateError) {
+        console.error("approveLeave RPC error:", updateError);
+        return false;
+    }
+
     return true;
 }
 
