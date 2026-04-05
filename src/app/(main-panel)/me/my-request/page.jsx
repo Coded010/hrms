@@ -1,5 +1,6 @@
 import { getMyLeaveRequests } from "actions/getMyLeaveRequests";
 import NewRequestModalWrapper from "./NewRequestModalWrapper";
+import Link from "next/link";
 import {
     FileText,
     Clock,
@@ -13,6 +14,8 @@ import {
     Info,
     Zap,
 } from "lucide-react";
+
+const PER_PAGE = 6;
 
 const STATUS_STYLES = {
     approved: "bg-emerald-50 text-emerald-700 border border-emerald-200",
@@ -49,10 +52,49 @@ function calcAvailable(balance) {
     return balance ? Math.max(0, Number(balance.total_days) - Number(balance.used_days)) : 0;
 }
 
-export default async function MyRequestsPage() {
-    const { requests, balances } = await getMyLeaveRequests();
+function PaginationButton({ href, disabled, children, className }) {
+    if (disabled) {
+        return (
+            <span className={`p-1.5 rounded-lg border border-gray-200 text-gray-400 opacity-40 ${className || ""}`}>
+                {children}
+            </span>
+        );
+    }
+    return (
+        <Link
+            href={href}
+            className={`p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 transition-colors ${className || ""}`}
+        >
+            {children}
+        </Link>
+    );
+}
 
-    const totalFiled = requests.length;
+function PageNumberButton({ page, current, href }) {
+    if (page === current) {
+        return (
+            <span className="w-8 h-8 rounded-lg text-sm font-medium bg-emerald-600 text-white flex items-center justify-center">
+                {page}
+            </span>
+        );
+    }
+    return (
+        <Link
+            href={href}
+            className="w-8 h-8 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center"
+        >
+            {page}
+        </Link>
+    );
+}
+
+export default async function MyRequestsPage({ searchParams }) {
+    const { page: pageParam } = await searchParams;
+    const currentPage = Math.max(1, parseInt(pageParam) || 1);
+
+    const { requests, balances, total } = await getMyLeaveRequests(currentPage, PER_PAGE);
+
+    const totalFiled = total;
     const pendingCount = requests.filter((r) => r.status === "pending").length;
 
     const vacBal = balances.find((b) => b.leave_type === "vacation");
@@ -63,11 +105,7 @@ export default async function MyRequestsPage() {
     const availableSick = calcAvailable(sickBal);
     const availableEmergency = calcAvailable(emerBal);
 
-    // Pagination
-    const PER_PAGE = 6;
     const totalPages = Math.max(1, Math.ceil(totalFiled / PER_PAGE));
-    const pagedRequests = requests.slice(0, PER_PAGE);
-    const page = 1;
 
     const STAT_CARDS = [
         {
@@ -106,6 +144,8 @@ export default async function MyRequestsPage() {
             iconColor: "text-emerald-500",
         },
     ];
+
+    const pageLink = (p) => p <= 1 ? "/me/my-request" : `/me/my-request?page=${p}`;
 
     return (
         <div className="space-y-6">
@@ -170,7 +210,7 @@ export default async function MyRequestsPage() {
                 </div>
 
                 {/* Table */}
-                {pagedRequests.length === 0 ? (
+                {requests.length === 0 ? (
                     <div className="px-6 py-16 text-center text-sm text-gray-400">
                         No leave requests found.
                     </div>
@@ -199,7 +239,7 @@ export default async function MyRequestsPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {pagedRequests.map((req) => (
+                                    {requests.map((req) => (
                                         <tr
                                             key={req.id}
                                             className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors"
@@ -256,7 +296,7 @@ export default async function MyRequestsPage() {
                             <p className="text-xs text-gray-500">
                                 Showing{" "}
                                 <span className="font-semibold text-gray-700">
-                                    {pagedRequests.length}
+                                    {requests.length}
                                 </span>{" "}
                                 of{" "}
                                 <span className="font-semibold text-gray-700">
@@ -265,32 +305,28 @@ export default async function MyRequestsPage() {
                                 requests
                             </p>
                             <div className="flex items-center gap-1">
-                                <button
-                                    disabled={page <= 1}
-                                    className="p-1.5 rounded-lg border border-gray-200 text-gray-400 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                                <PaginationButton
+                                    href={pageLink(currentPage - 1)}
+                                    disabled={currentPage <= 1}
                                 >
                                     <ChevronLeft className="w-4 h-4" />
-                                </button>
+                                </PaginationButton>
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                                     (p) => (
-                                        <button
+                                        <PageNumberButton
                                             key={p}
-                                            className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                                                p === page
-                                                    ? "bg-emerald-600 text-white"
-                                                    : "text-gray-600 hover:bg-gray-50"
-                                            }`}
-                                        >
-                                            {p}
-                                        </button>
+                                            page={p}
+                                            current={currentPage}
+                                            href={pageLink(p)}
+                                        />
                                     )
                                 )}
-                                <button
-                                    disabled={page >= totalPages}
-                                    className="p-1.5 rounded-lg border border-gray-200 text-gray-400 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                                <PaginationButton
+                                    href={pageLink(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
                                 >
                                     <ChevronRight className="w-4 h-4" />
-                                </button>
+                                </PaginationButton>
                             </div>
                         </div>
                     </>

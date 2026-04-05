@@ -2,6 +2,7 @@ import Sidebar from "components/dashboard/Sidebar";
 import Topbar from "components/dashboard/Topbar";
 import Footer from "components/dashboard/Footer";
 import { getCurrentUser } from "lib/supabase/auth/getCurrentUser";
+import { getEmployeeProfile } from "lib/supabase/auth/getEmployeeProfile";
 import { redirect } from "next/navigation";
 
 export const metadata = {
@@ -16,10 +17,9 @@ export default async function DeptLayout({ children }) {
         redirect("/");
     }
 
-    // TODO: fetch real user data from Supabase using `id`
-    const user = {
+    const user = await getEmployeeProfile() || {
         name: "Dr. John Doe",
-        role: "Dean, College of Computer Studies",
+        role: "Dean | CCS",
         avatarUrl: null,
     };
 
