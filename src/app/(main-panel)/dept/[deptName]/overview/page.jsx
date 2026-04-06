@@ -16,10 +16,12 @@ export default async function DashboardPage({ params }) {
         return <div className="p-8 text-gray-500">Department not found.</div>;
     }
 
-    const today = new Date();
+    // Use Philippine time (GMT+8) for all comparisons
+    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
     const todayStr = today.toISOString().split("T")[0];
-    const dayOfWeek = today.getDay();
-    const jsDayToDbDay = dayOfWeek === 0 ? 7 : dayOfWeek;
+    const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    // DB uses 1=Sunday, 2=Monday, ..., 7=Saturday
+    const dbDay = dayOfWeek === 0 ? 1 : dayOfWeek + 1;
     const currentMin = today.getHours() * 60 + today.getMinutes();
 
     // Fetch all employees in this department
@@ -41,7 +43,7 @@ export default async function DashboardPage({ params }) {
     const { data: schedules, error: schedErr } = await supabase
         .from("schedules")
         .select("id, subject_code, subject_name, start_time, end_time, room, section, employee_id")
-        .eq("day_of_week", jsDayToDbDay)
+        .eq("day_of_week", dbDay)
         .in("employee_id", empIds.length > 0 ? empIds : ["00000000-0000-0000-0000-000000000000"])
         .order("start_time", { ascending: true });
 

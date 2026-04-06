@@ -26,10 +26,12 @@ export default async function ClassCoveragePage({ params }) {
         return <div className="p-8 text-gray-500">Department &quot;{resolvedDeptName}&quot; not found.</div>;
     }
 
-    const today = new Date();
-    const todayStr = today.toISOString().split("T")[0]; // YYYY-MM-DD
-    const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon ... 6=Sat
-    const jsDayToDbDay = dayOfWeek === 0 ? 7 : dayOfWeek; // Convert to 1=Mon...7=Sun
+    // Use Philippine time (GMT+8) for all comparisons
+    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+    const todayStr = today.toISOString().split("T")[0];
+    const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    // DB uses 1=Sunday, 2=Monday, ..., 7=Saturday
+    const dbDay = dayOfWeek === 0 ? 1 : dayOfWeek + 1;
 
     // Fetch all employees in this department
     const { data: deptEmployees } = await supabase
@@ -49,11 +51,11 @@ export default async function ClassCoveragePage({ params }) {
     const { data: allSchedules, error: schedError } = await supabase
         .from("schedules")
         .select("id, subject_code, subject_name, day_of_week, start_time, end_time, room, section, employee_id")
-        .eq("day_of_week", jsDayToDbDay)
+        .eq("day_of_week", dbDay)
         .in("employee_id", empIds.length > 0 ? empIds : ["00000000-0000-0000-0000-000000000000"])
         .order("start_time", { ascending: true });
 
-    console.log("ClassCoverage: dept.id =", dept.id, "jsDayToDbDay =", jsDayToDbDay);
+    console.log("ClassCoverage: dept.id =", dept.id, "dbDay =", dbDay);
     console.log("ClassCoverage: schedules =", allSchedules?.length || 0, "error =", schedError);
 
     if (schedError) {
@@ -113,7 +115,7 @@ export default async function ClassCoveragePage({ params }) {
         if (currentMinutes >= startMin && currentMinutes < endMin) {
             // Currently in session
             if (isClockedIn) {
-                ongoing.push({ ...card, checkIn: formatTime12(clockedIn.time_in) });
+                ongoing.push({ ...card, clockIn: formatTime12(clockedIn.time_in) });
             } else {
                 unattended.push(card);
             }
