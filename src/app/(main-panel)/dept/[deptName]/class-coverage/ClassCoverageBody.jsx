@@ -81,7 +81,7 @@ export default function ClassCoverageBody({ ongoing, upcoming, unattended, total
                                 </div>
                             </div>
                             <div className="border-t border-gray-100 px-4 py-3 flex items-center justify-between bg-gray-50/50">
-                                <span className="text-xs text-gray-500 font-medium">Check-In: {card.checkIn}</span>
+                                <span className="text-xs text-gray-500 font-medium">Clock-In: {card.clockIn}</span>
                                 <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
                             </div>
                         </div>

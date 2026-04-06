@@ -38,6 +38,7 @@ export default async function FacultyManagementPage({ params }) {
 
         return {
             id: emp.employee_no || "N/A",
+            uuid: emp.id,
             name: fullName,
             email: emp.email,
             type: isFullTime ? "Full-Time" : "Part-Time",

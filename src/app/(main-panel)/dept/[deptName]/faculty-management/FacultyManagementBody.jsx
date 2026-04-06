@@ -25,6 +25,7 @@ import {
     TableRow,
     TableCell,
 } from "@/components/ui/table";
+import AssignScheduleModal from "./AssignScheduleModal";
 
 const computeStats = (data) => {
     const total = data.length;
@@ -118,6 +119,19 @@ const ITEMS_PER_PAGE = 10;
 export default function FacultyManagementBody({ initialFaculty }) {
     const [search, setSearch] = React.useState("");
     const [currentPage, setCurrentPage] = React.useState(1);
+    const [scheduleModal, setScheduleModal] = React.useState({
+        open: false,
+        employeeId: null,
+        facultyName: "",
+    });
+
+    const openScheduleModal = (faculty) => {
+        setScheduleModal({ open: true, employeeId: faculty.uuid, facultyName: faculty.name });
+    };
+
+    const closeScheduleModal = () => {
+        setScheduleModal({ open: false, employeeId: null, facultyName: "" });
+    };
 
     const filtered = initialFaculty.filter(
         (f) =>
@@ -237,6 +251,12 @@ export default function FacultyManagementBody({ initialFaculty }) {
                                             <DropdownMenuItem>View Profile</DropdownMenuItem>
                                             <DropdownMenuItem>Edit</DropdownMenuItem>
                                             <DropdownMenuSeparator />
+                                            <DropdownMenuItem
+                                                onSelect={() => openScheduleModal(faculty)}
+                                            >
+                                                Assign Schedule
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
                                             <DropdownMenuItem variant="destructive">Remove</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -273,6 +293,13 @@ export default function FacultyManagementBody({ initialFaculty }) {
                     </div>
                 </div>
             </div>
+
+            <AssignScheduleModal
+                open={scheduleModal.open}
+                onClose={closeScheduleModal}
+                facultyName={scheduleModal.facultyName}
+                employeeId={scheduleModal.employeeId}
+            />
         </div>
     );
 }
