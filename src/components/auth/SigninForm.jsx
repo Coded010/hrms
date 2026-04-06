@@ -59,43 +59,48 @@ export default function SigninForm() {
 
     return (
         <form
-            className="flex flex-col justify-center items-center gap-13 w-full"
+            className="flex flex-col gap-6 w-full"
             onSubmit={handleSubmit(onSubmit)}
-        >
-            <Field
-                type="email"
-                placeholder="Enter your email"
-                registration={register("email")}
-                state={emailInfo.state}
-                message={emailInfo.message}
-                disabled={isSubmitting}
-                onFocus={() => setFocus("email", true)}
-                onBlur={() => setFocus("email", false)}
-            />
-
-            <div className="relative w-full">
-                <Link
-                    href="/reset-password"
-                    className="absolute text-primary text-[16px] right-2 bottom-[-25px] hover:underline hover:underline-offset-2"
-                >
-                    Forgot password?
-                </Link>
+        >   
+            <section className="flex flex-col gap-4 sm:gap-5 w-full">
 
                 <Field
-                    type="password"
-                    placeholder="Enter your password"
-                    registration={register("password")}
-                    state={passwordInfo.state}
-                    message={passwordInfo.message}
+                    type="email"
+                    placeholder="Enter your email"
+                    registration={register("email")}
+                    state={emailInfo.state}
+                    message={emailInfo.message}
                     disabled={isSubmitting}
-                    onFocus={() => setFocus("password", true)}
-                    onBlur={() => setFocus("password", false)}
+                    onFocus={() => setFocus("email", true)}
+                    onBlur={() => setFocus("email", false)}
                 />
-            </div>
 
+                <div className="flex flex-col gap-2 w-full">
+                    <Field
+                        type="password"
+                        placeholder="Enter your password"
+                        registration={register("password")}
+                        state={passwordInfo.state}
+                        message={passwordInfo.message}
+                        disabled={isSubmitting}
+                        onFocus={() => setFocus("password", true)}
+                        onBlur={() => setFocus("password", false)}
+                    />
+                    <div className="flex justify-end w-full px-1">
+                        <Link
+                            href="/reset-password"
+                            className="text-primary text-sm sm:text-base hover:underline hover:underline-offset-2 transition-all duration-200"
+                        >
+                            Forgot password?
+                        </Link>
+                    </div>
+                </div>
+
+            </section>
+            
             <button
                 type="submit"
-                className="btn btn-primary btn-lg w-full"
+                className="btn btn-primary btn-md sm:btn-lg w-full mt-2"
                 disabled={isSubmitting}
             >
                 {isSubmitting ? (

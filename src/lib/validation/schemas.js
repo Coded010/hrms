@@ -24,6 +24,14 @@ export const signUpSchema = z.object({
   .min(1, 'Last name is required')
   .min(2, 'Too short, at least 2 characters'),
 
+  department: z
+  .string()
+  .min(1, 'Department is required'),
+
+  role: z
+  .string()
+  .min(1, 'Role is required'),
+
   email: gmail,
 
   password: z
